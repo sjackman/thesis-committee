@@ -96,7 +96,7 @@ Boston, Massachusetts, USA
 
 [![ISMB 2014 poster](images/ismb-2014-poster.png)][ISMB 2014 poster]
 
-[ISMB 2014 poster]: http://www.iscb.org/ismb2014
+[ISMB 2014 poster]: http://f1000.com/posters/browse/summary/1096524
 
 Teaching assistant
 ================================================================================
