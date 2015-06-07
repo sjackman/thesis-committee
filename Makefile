@@ -1,12 +1,12 @@
-all: thesis-committee.html
+all: 2014-08-22.html
 
 clean:
-	rm -f thesis-committee.html
+	rm -f 2014-08-22.html
 
 install-deps:
 	brew install pandoc
 
-.PHONY: all clean
+.PHONY: all clean install-deps
 .DELETE_ON_ERROR:
 .SECONDARY:
 
