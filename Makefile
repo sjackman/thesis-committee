@@ -1,7 +1,7 @@
-all: 2014-08-22.html
+all: 2014-08-22.html 2015-06-15.html
 
 clean:
-	rm -f 2014-08-22.html
+	rm -f 2014-08-22.html 2015-06-15.html
 
 install-deps:
 	brew install pandoc
@@ -13,4 +13,4 @@ install-deps:
 # Rules
 
 %.html: %.md
-	pandoc -st revealjs -V theme:sky -o $@ $<
+	pandoc -Sst revealjs -V theme:sky -o $@ $<
