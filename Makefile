@@ -1,16 +1,16 @@
-all: thesis-committee.html
+all: 2014-08-22.html 2015-06-15.html
 
 clean:
-	rm -f thesis-committee.html
+	rm -f 2014-08-22.html 2015-06-15.html
 
 install-deps:
 	brew install pandoc
 
-.PHONY: all clean
+.PHONY: all clean install-deps
 .DELETE_ON_ERROR:
 .SECONDARY:
 
 # Rules
 
 %.html: %.md
-	pandoc -st revealjs -V theme:sky -o $@ $<
+	pandoc -Sst revealjs -V theme:sky -o $@ $<
