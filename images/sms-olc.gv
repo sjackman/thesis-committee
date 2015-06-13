@@ -1,0 +1,49 @@
+strict digraph OLC {
+
+rankdir = LR
+
+subgraph cluster_Overlap {
+	label = Overlap
+	BLASR
+	DALIGNER
+	MHAP
+}
+
+subgraph cluster_Correct {
+	label = Correct
+	PBDAGCon
+	Falcon_sense
+	Dazzler_correct
+	Nanocorrect
+}
+
+subgraph cluster_Layout {
+	label = Layout
+	Celera [label="Celera Assembler"]
+	Falcon
+	Dazzler
+}
+
+subgraph cluster_Consensus {
+	label = Consensus
+	Quiver
+	Nanopolish
+}
+
+// HGAP
+BLASR -> PBDAGCon -> Celera -> Quiver
+
+// Falcon
+DALIGNER -> Falcon_sense -> Falcon -> Quiver
+
+// PBcR
+MHAP -> PBDAGCon -> Celera -> Quiver
+MHAP -> Falcon_sense -> Celera -> Quiver
+
+// Dazzler
+DALIGNER -> Dazzler_correct -> Dazzler -> Quiver
+
+// Nanopolish
+DALIGNER -> Nanocorrect -> Celera -> Nanopolish
+
+}
