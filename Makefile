@@ -17,3 +17,18 @@ index.html: README.md
 
 %.html: %.md
 	pandoc -Sst revealjs -V theme:sky -o $@ $<
+
+revealjs-3.6.0.tar.gz:
+	curl -L -o $@ https://github.com/hakimel/reveal.js/archive/3.6.0.tar.gz
+
+reveal.js-3.6.0/js/reveal.js: revealjs-3.6.0.tar.gz
+	tar xf $<
+	touch $@
+
+reveal.js/js/reveal.js: reveal.js-3.6.0/js/reveal.js
+	cp -a reveal.js-3.6.0 reveal.js
+	sed -i .orig \
+		-e 's/text-transform: uppercase;//' \
+		-e 's/font-size: 40px;/font-size: 34px;/' \
+		reveal.js/css/theme/sky.css
+	touch $@
