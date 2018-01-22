@@ -30,5 +30,7 @@ reveal.js/js/reveal.js: reveal.js-3.6.0/js/reveal.js
 	sed -i .orig \
 		-e 's/text-transform: uppercase;//' \
 		-e 's/font-size: 40px;/font-size: 34px;/' \
+		-e 's/border: 4px solid #333;/border: 0px solid #333;/' \
+		-e 's/box-shadow: 0 0 10px/box-shadow: 0 0 0px/' \
 		reveal.js/css/theme/sky.css
 	touch $@
