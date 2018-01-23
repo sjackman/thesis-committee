@@ -1,7 +1,7 @@
-all: index.html 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-01-30.html
+all: 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-01-30.html
 
 clean:
-	rm -f index.html 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-01-30.html
+	rm -f 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-01-30.html
 
 install-deps:
 	brew install pandoc
@@ -12,19 +12,20 @@ install-deps:
 
 # Rules
 
-index.html: README.md
-	pandoc -Ss $< >$@
-
+# Render Markdown to HTML.
 %.html: %.md
 	pandoc -Sst revealjs -V theme:sky -o $@ $<
 
+# Download reveal.js
 revealjs-3.6.0.tar.gz:
 	curl -L -o $@ https://github.com/hakimel/reveal.js/archive/3.6.0.tar.gz
 
+# Extract reveal.js
 reveal.js-3.6.0/js/reveal.js: revealjs-3.6.0.tar.gz
 	tar xf $<
 	touch $@
 
+# Patch reveal.js
 reveal.js/js/reveal.js: reveal.js-3.6.0/js/reveal.js
 	cp -a reveal.js-3.6.0 reveal.js
 	sed -i .orig \
