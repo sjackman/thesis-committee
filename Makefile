@@ -1,7 +1,7 @@
-all: 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-01-30.html
+all: 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html
 
 clean:
-	rm -f 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-01-30.html
+	rm -f 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html
 
 install-deps:
 	brew install pandoc
