@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
   <meta name="author" content="Shaun Jackman">
-  <meta name="dcterms.date" content="2018-01-30">
+  <meta name="dcterms.date" content="2018-03-14">
   <title>PhD thesis committee meeting</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -31,7 +31,7 @@
 <section>
   <h1 class="title">PhD thesis committee meeting</h1>
   <p class="author">Shaun Jackman</p>
-  <p class="date">2018-01-30</p>
+  <p class="date">2018-03-14</p>
 </section>
 
 <section id="shaun-jackman" class="slide level2">
@@ -44,14 +44,14 @@
 <h2>Thesis Committee</h2>
 <div style="white-space: pre-line;"><a href="http://www.bcgsc.ca/faculty/inanc-birol">Inanc Birol</a>
 <a href="http://bohlmannlab.msl.ubc.ca/">Joerg Bohlmann</a>
-<a href="http://www.stat.ubc.ca/~jenny/">Jenny Bryan</a>
-<a href="http://hallam.microbiology.ubc.ca/">Steven Hallam</a></div>
+<a href="http://hallam.microbiology.ubc.ca/">Steven Hallam</a>
+<a href="http://www.bcgsc.ca/faculty/sjones">Steven Jones</a></div>
 </section>
 <section id="timeline" class="slide level2">
 <h2>Timeline</h2>
 <ul>
 <li>Previous meeting 2015-07-27</li>
-<li>Fourth committee meeting 2018-01-30</li>
+<li>Fourth committee meeting 2018-03-14</li>
 <li>Start writing early 2018</li>
 <li>Submit thesis and defend late 2018</li>
 <li>Graduate spring 2019</li>
@@ -196,17 +196,18 @@ using linked reads</li>
 <ul>
 <li>10x Genomics Chromium sequencing</li>
 <li>&gt; 50x mitochondrial coverage in one lane</li>
-<li>7 lanes of Oxford Nanopore Sequencing</li>
-<li>~ 1x nuclear coverage</li>
-<li>&gt; 10x mitochondrial coverage</li>
-<li>Assemble Nanopore reads</li>
+<li>11 lanes of Oxford Nanopore Sequencing</li>
+<li>3x nuclear coverage</li>
+<li>14x mitochondrial coverage</li>
+<li>Assemble Nanopore reads<br />
+with Canu and Unicycler</li>
 <li>Scaffold and polish with linked reads</li>
 </ul>
 </section>
 <section class="slide level2">
 
 <figure>
-<img src="images/sitka-spruce-mt-miniasm.png" alt="Nanopore reads assembled with Miniasm" /><figcaption>Nanopore reads assembled with Miniasm</figcaption>
+<img src="images/sitka-spruce-mt-canu.png" alt="Nanopore reads assembled with Canu" /><figcaption>Nanopore reads assembled with Canu</figcaption>
 </figure>
 </section>
 <section id="sitka-spruce-mitochondrion-1" class="slide level2">
@@ -240,7 +241,7 @@ using linked reads</li>
 <li>Compared to ABySS 1.5 and six other assemblers</li>
 <li>Submitted genome assemblies to NCBI</li>
 <li>Published paper in Genome Research (2017)</li>
-<li>Submitted paper to RECOMB 2018 Highlights</li>
+<li>Presenting a talk at RECOMB-Seq 2018</li>
 </ul>
 <div style="white-space: pre-line;"><img src="http://sjackman.ca/img/abyss-2.0.png" alt="ABySS 2.0 chromosomes" /></div>
 </section>
@@ -251,9 +252,9 @@ using linked reads</li>
 <li>Incorrectly assembled sequence complicates all downstream analyses</li>
 <li>Misassemblies also limit contiguity</li>
 <li>Cut contigs where linked reads and assembly disagree</li>
-<li>Tigmint + ARCS improved contiguity by half over ARCS alone in human</li>
-<li>Further developing the tool with Lauren Coombe</li>
-<li>Submit manuscript to RECOMB-Seq 2018</li>
+<li>Tigmint + ARCS improved contiguity two fold over ARCS alone in human from 8 Mbp to 16 Mbp scaffold NGA50</li>
+<li>Further developed the tool with Lauren Coombe</li>
+<li>Presenting a talk and poster at RECOMB-Seq 2018</li>
 </ul>
 <p><a href="http://github.com/bcgsc/tigmint"><img src="http://sjackman.ca/img/tigmint.png" alt="Tigmint" height="100" /></a></p>
 </section>
