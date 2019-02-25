@@ -1,7 +1,7 @@
-all: 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html
+all: 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html 2019-02-25.html
 
 clean:
-	rm -f 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html
+	rm -f 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html 2019-02-25.html
 
 install-deps:
 	brew install pandoc
@@ -14,7 +14,7 @@ install-deps:
 
 # Render Markdown to HTML.
 %.html: %.md
-	pandoc -Sst revealjs -V theme:sky -o $@ $<
+	pandoc -st revealjs -V theme:sky -o $@ $<
 
 # Download reveal.js
 revealjs-3.6.0.tar.gz:
