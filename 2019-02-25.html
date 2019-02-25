@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Shaun Jackman">
+  <meta name="dcterms.date" content="2019-02-25">
+  <title>Efficient Assembly of Large Genomes</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/sky.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Efficient Assembly of Large Genomes</h1>
+  <p class="subtitle">PhD thesis defence rehearsal</p>
+  <p class="author">Shaun Jackman</p>
+  <p class="date">2019-02-25</p>
+</section>
+
+<section id="shaun-jackman" class="slide level2">
+<h2>Shaun Jackman</h2>
+<div class="line-block"><a href="http://bcgsc.ca">Genome Sciences Centre</a>, BC Cancer, Vancouver, Canada<br />
+<a href="https://twitter.com/sjackman">@sjackman</a> · <a href="https://github.com/sjackman">github.com/sjackman</a> · <a href="http://sjackman.ca">sjackman.ca</a></div>
+<p><a href="http://sjackman.ca"><img data-src="images/sjackman.jpg" alt="Photo" /></a></p>
+</section>
+<section id="thesis-committee" class="slide level2">
+<h2>Thesis Committee</h2>
+<div class="line-block"><a href="http://www.bcgsc.ca/faculty/inanc-birol">Inanc Birol</a>, Medical Genetics<br />
+<a href="http://bohlmannlab.msl.ubc.ca/">Joerg Bohlmann</a>, Michael Smith Laboratories<br />
+<a href="http://hallam.microbiology.ubc.ca/">Steven Hallam</a>, Microbiology &amp; Immunology<br />
+<a href="http://www.bcgsc.ca/faculty/sjones">Steven Jones</a>, Medical Genetics</div>
+<p style="font-size:10pt">
+</p>
+<h3 id="university-examiners">University Examiners</h3>
+<div class="line-block"><a href="https://www.msl.ubc.ca/people/dr-paul-pavlidis/">Paul Pavlidis</a>, Michael Smith Laboratories<br />
+<a href="https://botany.ubc.ca/people/keith-adams">Keith Adams</a>, Botany</div>
+<p>Previous committee meeting 2018-03-14</p>
+</section>
+<section class="slide level2">
+
+<div class="line-block">2018 Tigmint. <em>BMC Bioinformatics</em><br />
+<a href="https://doi.org/10.1186/s12859-018-2425-6"><img data-src="images/Tigmint-BMC.png" alt="Tigmint" height="100" /></a><br />
+2017 ABySS 2.0. <em>Genome Research</em><br />
+<a href="https://doi.org/10.1101/gr.214346.116"><img data-src="images/ABySS-2.0-2017.png" alt="ABySS 2.0" height="100" /></a><br />
+2016 White Spruce Organelles. <em>Genome Biology and Evolution</em><br />
+<a href="https://doi.org/10.1093/gbe/evv244"><img data-src="images/white-spruce-organelles.png" alt="Organellar Genomes of White Spruce" height="100" /></a><br />
+2015 UniqTag. <em>PLOS ONE</em><br />
+<a href="https://doi.org/10.1371/journal.pone.0128026"><img data-src="images/UniqTag-PLOSONE-small.png" alt="UniqTag" height="100" /></a></div>
+<aside class="notes">
+<ul>
+<li>Tigmint: correcting assembly errors using linked reads from large molecules<br />
+<small> <strong>SD Jackman</strong>, L Coombe, J Chu, RL Warren, BP Vandervalk, …<br />
+<em>BMC Bioinformatics</em> 2018 </small></li>
+<li>ABySS 2.0: resource-efficient assembly of large genomes using a Bloom filter<br />
+<small> <strong>SD Jackman</strong><sup>*</sup>, BP Vandervalk<sup>*</sup>, H Mohamadi, J Chu, S Yeo, SA Hammond, …<br />
+<em>Genome Research</em> 2017 </small></li>
+<li>Organellar genomes of white spruce (<em>Picea glauca</em>): assembly and annotation<br />
+<small> <strong>SD Jackman</strong>, RL Warren, EA Gibb, BP Vandervalk, H Mohamadi, J Chu, …<br />
+<em>Genome Biology and Evolution</em> 2015 </small></li>
+<li>UniqTag: content-derived unique and stable identifiers for gene annotation<br />
+<small> <strong>SD Jackman</strong>, J Bohlmann, I Birol<br />
+<em>PLOS ONE</em> 2015 </small></li>
+</ul>
+</aside>
+</section>
+<section id="selected-papers" class="slide level2">
+<h2>Selected Papers</h2>
+<ul>
+<li>Assembly of the complete Sitka spruce chloroplast… <small> L Coombe, RL Warren, <strong>SD Jackman</strong>, C Yang, BP Vandervalk, …, I Birol<br />
+<em>PloS one</em> 2016 </small></li>
+<li>Spaced seed data structures for de novo assembly<br />
+<small> I Birol, J Chu, H Mohamadi, <strong>SD Jackman</strong>, K Raghavan, …, RL Warren<br />
+<em>International journal of genomics</em> 2015 </small></li>
+<li>Konnector v2.0: pseudo-long reads from PE sequencing<br />
+<small> BP Vandervalk, C Yang, Z Xue, K Raghavan, J Chu, H Mohamadi, <strong>SD Jackman</strong>, …, I Birol<br />
+<em>BMC medical genomics</em> 2015 </small></li>
+<li>Sealer: a scalable gap-closing application…<br />
+<small> D Paulino, RL Warren, BP Vandervalk, A Raymond, <strong>SD Jackman</strong>, I Birol<br />
+<em>BMC Bioinformatics</em> 2015 </small></li>
+<li>On the representation of de Bruijn graphs<br />
+<small> R Chikhi, A Limasset, <strong>SD Jackman</strong>, JT Simpson, P Medvedev<br />
+<em>Journal of Computational Biology</em> 2015 </small></li>
+<li>Improved white spruce (<em>Picea glauca</em>) genome…<br />
+<small> RL Warren, CI Keeling, MMS Yuen, A Raymond, GA Taylor, …, J Bohlmann<br />
+<em>The Plant Journal</em> 2015 </small></li>
+<li>Assembling the 20Gb white spruce genome…<br />
+<small> I Birol, A Raymond, <strong>SD Jackman</strong>, S Pleasance, R Coope, …, SJM Jones<br />
+<em>Bioinformatics</em> 2013 </small></li>
+</ul>
+</section>
+<section id="papers" class="slide level2">
+<h2>Papers</h2>
+<ul>
+<li>Four first-author (or joint) papers</li>
+<li>One paper each year from 2015 through 2018</li>
+<li>Collaborated on 32 papers since 2009</li>
+<li>28 papers with at least 10 citations</li>
+<li>One first-author manuscript in review (ORCA)</li>
+<li>One first-author manuscript in preparation<br />
+(Sitka spruce mitochondrion)</li>
+<li>ABySS has been cited over 2,700 times!</li>
+</ul>
+<p><a href="https://scholar.google.ca/citations?user=wFl3qXAAAAAJ&amp;hl=en"><img data-src="images/abyss-citations.png" alt="Citations of ABySS (Google Scholar)" /></a></p>
+</section>
+<section id="manuscripts" class="slide level2">
+<h2>Manuscripts</h2>
+<ul>
+<li>ORCA: A Comprehensive Bioinformatics Container Environment for Education and Research <small> <strong>SD Jackman</strong><sup>*</sup>, T Mozgacheva<sup>*</sup>, S Chen, B O’Huiginn, L Bailey, I Birol, SJM Jones<br />
+(in review) </small></li>
+<li>Largest Complete Mitochondrial Genome of a Gymnosperm, Sitka Spruce (<em>Picea sitchensis</em>), Indicates Complex Physical Structure <small> <strong>SD Jackman</strong>, L Coombe, RL Warren, …, J Bohlmann, SJM Jones, Inanc Birol </small></li>
+</ul>
+</section>
+<section id="efficient-assembly-of-large-genomes" class="slide level2">
+<h2>Efficient Assembly<br>of Large Genomes</h2>
+<ol type="1">
+<li>Introduction</li>
+<li>ABySS 2.0</li>
+<li>Tigmint</li>
+<li>UniqTag</li>
+<li>ORCA</li>
+<li>Organellar genomes of white spruce</li>
+<li>Mitochondrial genome of Sitka spruce</li>
+<li>Genome assembly of western redcedar</li>
+<li>Conclusion</li>
+</ol>
+</section>
+<section id="abyss-2.0" class="slide level2">
+<h2>ABySS 2.0</h2>
+<ul>
+<li>Implemented Bloom filter de Bruijn Graph
+<ul>
+<li><a href="http://doi.org/10.1109/BIBM.2014.6999126">Konnector</a> and <a href="https://doi.org/10.1186/1755-8794-8-S3-S1">Konnector 2.0</a> with Ben Vandervalk</li>
+<li><a href="http://www.biomedcentral.com/1471-2105/16/230">Sealer</a> with Daniel Paulino</li>
+<li><a href="#/abyss-2.0-1">ABySS 2.0</a> with Ben Vandervalk</li>
+</ul></li>
+<li>Reduce memory usage by twelve fold over ABySS 1.0</li>
+<li>Assemble a conifer genome with a single machine</li>
+<li>Memory usage is independent of parameter <em>k</em></li>
+<li>Assembled a human genome with ABySS 2.0 (35 GB RAM)</li>
+</ul>
+</section>
+<section id="abyss-2.0-1" class="slide level2">
+<h2>ABySS 2.0</h2>
+<ul>
+<li>Compared to ABySS 1.5 and six other assemblers</li>
+<li>Submitted genome assemblies to NCBI</li>
+<li>Published paper in <em>Genome Research</em> (2017)</li>
+<li>Presented a talk at RECOMB-Seq 2018</li>
+</ul>
+<div class="line-block"><img data-src="http://sjackman.ca/img/abyss-2.0.png" alt="ABySS 2.0 chromosomes" /></div>
+</section>
+<section class="slide level2">
+
+<p><a href="https://github.com/bcgsc/tigmint"><img data-src="http://sjackman.ca/img/tigmint.png" alt="Tigmint" height="150" /></a></p>
+<p>Correcting misassemblies using linked reads</p>
+<ul>
+<li>Incorrectly assembled sequence complicates all downstream analyses</li>
+<li>Misassemblies also limit contiguity</li>
+<li>Cut contigs where linked reads and assembly disagree</li>
+<li>Tigmint + ARCS improved contiguity two fold over ARCS alone in human from 8 Mbp to 16 Mbp scaffold NGA50</li>
+<li>Further developed the tool with Lauren Coombe</li>
+<li>Presented a talk and poster at RECOMB-Seq 2018</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/tigmint-jupiter.png" alt="Tigmint Jupiter plot" /></div>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/tigmint-metrics.png" alt="Tigmint Assembly Metrics" height="600" /></div>
+</section>
+<section id="uniqtag" class="slide level2">
+<h2>UniqTag</h2>
+<p>Assign unique and stable gene identifiers<br />
+to genes based on their sequence content</p>
+<h3 id="background">Background</h3>
+<ul>
+<li>Genes without function identified by serial number</li>
+<li>One small changes causes a complete renumbering</li>
+<li>Inconvenient when gene identifiers change<br />
+between assembly versions</li>
+</ul>
+<p style="font-size:10pt">
+</p>
+<h3 id="uniqtag-1">UniqTag</h3>
+<ul>
+<li>Genes with unchanged coding sequence have<br />
+stable identifiers between assembly versions</li>
+<li>Published paper in <em>PLOS ONE</em> (2015)</li>
+</ul>
+</section>
+<section id="orca" class="slide level2">
+<h2>ORCA</h2>
+<ul>
+<li>Comprehensive bioinformatics computing environment</li>
+<li>Includes hundreds of bioinformatics tools<br />
+in a single easily-installed Docker image<br />
+(all tools available to the Homebrew package manager)</li>
+<li>Useful for education and research</li>
+</ul>
+<p style="font-size:10pt">
+</p>
+<h3 id="use-cases">Use Cases</h3>
+<ul>
+<li>External collaborators of BC Cancer</li>
+<li>Hackseq genomics hackathon (<a href="https://hackseq.com" class="uri">https://hackseq.com</a>)</li>
+<li>Undergraduate class on bioinformatics at UBC</li>
+</ul>
+</section>
+<section id="white-spruce-organelles" class="slide level2">
+<h2>White Spruce Organelles</h2>
+<ul>
+<li>Assembled cpDNA and mtDNA genomes</li>
+<li>Annotated genes (mRNA, rRNA, tRNA) and repeats</li>
+<li>Analysed RNA-seq data to quantify
+<ul>
+<li>transcript abundance in eight tissues</li>
+<li>expressed ORFs</li>
+<li>C-to-U RNA editing</li>
+<li>cryptic ACG start codons due to C-to-U RNA editing</li>
+</ul></li>
+<li>Submitted annotated genomes to GenBank</li>
+<li>Published paper in Genome Biology and Evolution (2015)</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/pgmt-genes.png" alt="White Spruce Mitochondrion" height="600" /><figcaption>White Spruce Mitochondrion</figcaption>
+</figure>
+</section>
+<section id="sitka-spruce-mitochondrion-methods" class="slide level2">
+<h2>Sitka Spruce Mitochondrion Methods</h2>
+<ul>
+<li>11 lanes of Oxford Nanopore Sequencing</li>
+<li>5x nuclear coverage</li>
+<li>26x mitochondrial coverage</li>
+<li>10x Genomics Chromium sequencing</li>
+<li>59x mitochondrial coverage in one lane</li>
+<li>Assemble Nanopore reads</li>
+<li>Polish with linked reads</li>
+<li>Annotate genes</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/sitka-spruce-mt-flye.png" alt="Nanopore reads assembled with Flye" /><figcaption>Nanopore reads assembled with Flye</figcaption>
+</figure>
+</section>
+<section id="sitka-spruce-mitochondrion-results" class="slide level2">
+<h2>Sitka Spruce Mitochondrion Results</h2>
+<ul>
+<li>Largest complete mitochondrial genome<br />
+of a gymnosperm (5.5 Mbp)</li>
+<li>Multipartite genome structure</li>
+<li>Rosette-like assembly graph</li>
+<li>26 introns in 13 genes</li>
+<li>13 trans-spliced introns in 7 genes</li>
+</ul>
+</section>
+<section id="western-redcedar-methods" class="slide level2">
+<h2>Western Redcedar Methods</h2>
+<ul>
+<li>Trim adapters with Trimadap and NxTrim</li>
+<li>Count k-mers with ntCard</li>
+<li>Estimate genome size GenomeScope</li>
+<li>Assemble PE and MP reads with ABySS 2.0</li>
+<li>Correct assembly errors<br />
+with Chromium reads using Tigmint</li>
+<li>Scaffold with Chromium reads using ARCS</li>
+<li>Assess genome completeness using BUSCO</li>
+</ul>
+</section>
+<section id="western-redcedar-results" class="slide level2">
+<h2>Western Redcedar Results</h2>
+<ul>
+<li>12.5 Gbp genome size estimated by flow cytometry<br />
+(Hizume <em>et al.</em> 2001 <a href="https://doi.org/d89svf" class="uri">https://doi.org/d89svf</a>)</li>
+<li>9.8 Gbp genome size estimated by GenomeScope</li>
+<li>7.95 Gbp assembled in scaffolds 1 kbp or larger</li>
+<li>2.31 Mbp scaffold N50</li>
+<li>1.71 Mbp scaffold NG50 (with <em>G</em>=10 Gbp)</li>
+<li>Tigmint improved NG50 by 14% over ARCS alone</li>
+<li>BUSCO 60.4% of core single-copy genes present<br />
+53.9% complete, 6.5% fragmented, 39.6% missing</li>
+</ul>
+</section>
+<section id="efficient-assembly-of-large-genomes-1" class="slide level2">
+<h2>Efficient Assembly<br>of Large Genomes</h2>
+<ol type="1">
+<li>Introduction</li>
+<li>ABySS 2.0</li>
+<li>Tigmint</li>
+<li>UniqTag</li>
+<li>ORCA</li>
+<li>Organellar genomes of white spruce</li>
+<li>Mitochondrial genome of Sitka spruce</li>
+<li>Genome assembly of western redcedar</li>
+<li>Conclusion</li>
+</ol>
+</section>
+<section><section id="fin" class="title-slide slide level1"><h1>fin</h1></section><section id="shaun-jackman-1" class="slide level2">
+<h2>Shaun Jackman</h2>
+<div class="line-block"><a href="http://bcgsc.ca">Genome Sciences Centre</a>, BC Cancer, Vancouver, Canada<br />
+<a href="https://twitter.com/sjackman">@sjackman</a> · <a href="https://github.com/sjackman">github.com/sjackman</a> · <a href="http://sjackman.ca">sjackman.ca</a></div>
+<p><a href="http://sjackman.ca"><img data-src="images/sjackman.jpg" alt="Photo" /></a></p>
+</section></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display the page number of the current slide
+        slideNumber: true,
+        // Push each slide change to the browser history
+        history: true,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
