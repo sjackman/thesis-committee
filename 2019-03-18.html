@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Shaun Jackman">
+  <meta name="dcterms.date" content="2019-03-18">
+  <title>Efficient Assembly of Large Genomes</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/sky.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Efficient Assembly of Large Genomes</h1>
+  <p class="subtitle">Doctoral examination rehearsal</p>
+  <p class="author">Shaun Jackman</p>
+  <p class="date">2019-03-18</p>
+</section>
+
+<section id="shaun-jackman" class="slide level2">
+<h2>Shaun Jackman</h2>
+<div class="line-block"><a href="http://bcgsc.ca">Genome Sciences Centre</a>, BC Cancer, Vancouver, Canada<br />
+<a href="https://twitter.com/sjackman">@sjackman</a> · <a href="https://github.com/sjackman">github.com/sjackman</a> · <a href="http://sjackman.ca">sjackman.ca</a></div>
+<p><a href="http://sjackman.ca"><img data-src="images/sjackman.jpg" alt="Photo" /></a></p>
+</section>
+<section id="efficient-assembly-of-large-genomes" class="slide level2">
+<h2>Efficient Assembly<br>of Large Genomes</h2>
+<ol type="1">
+<li>Introduction</li>
+<li><strong>ABySS 2.0</strong></li>
+<li><strong>Tigmint</strong></li>
+<li>UniqTag</li>
+<li>ORCA</li>
+<li>Organellar genomes of white spruce</li>
+<li>Mitochondrial genome of Sitka spruce</li>
+<li><strong>Genome assembly of western redcedar</strong></li>
+<li>Conclusion</li>
+</ol>
+</section>
+<section class="slide level2">
+
+<div class="columns">
+<div class="column">
+<div class="line-block">Tigmint<br />
+<em>BMC Bioinformatics</em><br />
+2018 <a href="https://doi.org/cwfh">doi.org/cwfh</a><br />
+<a href="https://doi.org/10.1186/s12859-018-2425-6"><img data-src="images/Tigmint-BMC.png" alt="Tigmint" height="100" /></a><br />
+ABySS 2.0<br />
+<em>Genome Research</em><br />
+2017 <a href="https://doi.org/f9x8qp">doi.org/f9x8qp</a><br />
+<a href="https://doi.org/10.1101/gr.214346.116"><img data-src="images/ABySS-2.0-2017.png" alt="ABySS 2.0" height="100" /></a></div>
+</div><div class="column">
+<div class="line-block">White Spruce Organelles<br />
+<em>Genome Biology and Evolution</em><br />
+2016 <a href="https://doi.org/f8bxck">doi.org/f8bxck</a><br />
+<a href="https://doi.org/10.1093/gbe/evv244"><img data-src="images/white-spruce-organelles.png" alt="Organellar Genomes of White Spruce" height="100" /></a><br />
+UniqTag<br />
+<em>PLOS ONE</em><br />
+2015 <a href="https://doi.org/c3m3">doi.org/c3m3</a><br />
+<a href="https://doi.org/10.1371/journal.pone.0128026"><img data-src="images/UniqTag-PLOSONE-small.png" alt="UniqTag" height="100" /></a></div>
+</div>
+</div>
+</section>
+<section id="short-read-genome-assembly" class="slide level2">
+<h2>Short Read Genome Assembly</h2>
+<div class="line-block">ABySS 1.0 (2009) was the first to assemble<br />
+a human genome from short reads (42 bp!)</div>
+<p><a href="https://doi.org/10.1101/gr.089532.108"><img data-src="images/abyss-paper.png" alt="ABySS 1.0 paper" /></a></p>
+</section>
+<section class="slide level2">
+
+<p><a href="https://github.com/bcgsc/abyss"><img data-src="images/abyss-logo.png" alt="ABySS 1.0 logo" /></a></p>
+<ul>
+<li>de Bruijn graph assembler</li>
+<li>Stored <em>k</em>-mers in a hash table</li>
+<li>Distributed the hash table over many machines</li>
+<li>Used MPI to aggregate sufficient memory</li>
+<li>Assembles large genomes</li>
+</ul>
+</section>
+<section id="challenges" class="slide level2">
+<h2>Challenges</h2>
+<ol type="1">
+<li>Uses lots of memory</li>
+<li>Message passing is slow</li>
+<li>Network communication is really slow</li>
+</ol>
+</section>
+<section id="solution" class="slide level2">
+<h2>Solution</h2>
+<ol type="1">
+<li><div class="line-block">A memory-efficient data structure<br />
+reduces memory usage</div></li>
+<li><div class="line-block">Fitting entire graph in a single machine<br />
+eliminates network communication</div></li>
+<li><div class="line-block">Using shared memory (OpenMP)<br />
+eliminates message passing (MPI)</div></li>
+</ol>
+</section>
+<section class="slide level2">
+
+<p><a href="https://github.com/bcgsc/abyss"><img data-src="images/abyss2-logo.png" alt="ABySS 2.0 logo" /></a></p>
+<div class="line-block">ABySS 2.0 reduces the memory<br />
+usage of ABySS by ten fold.</div>
+<p><a href="https://doi.org/10.1101/gr.214346.116"><img data-src="images/ABySS-2.0-2017.png" alt="ABySS 2.0 paper" /></a></p>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/abyss2-data-structures.png" alt="Memory efficient de Bruijn graph using a Bloom filter Memory usage is independent of k" height="550" /><figcaption>Memory efficient de Bruijn graph using a Bloom filter<br>Memory usage is independent of <em>k</em></figcaption>
+</figure>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/abyss2-bloom-dbg-nav.png" alt="Navigating a Bloom filter de Bruijn graph Introduced by Minia (Chikhi et al. 2012)" /><figcaption>Navigating a Bloom filter de Bruijn graph<br>Introduced by Minia (Chikhi <em>et al.</em> 2012)</figcaption>
+</figure>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/abyss2-error-correction.png" alt="Sequencing errors and Bloom filter false positives" /><figcaption>Sequencing errors and Bloom filter false positives</figcaption>
+</figure>
+</section>
+<section id="spruce-genome-assemblies" class="slide level2">
+<h2>Spruce genome assemblies</h2>
+<table>
+<thead>
+<tr class="header">
+<th>ABySS</th>
+<th>1.3.5</th>
+<th>2.0.0</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Spruce species</td>
+<td>Interior</td>
+<td>Sitka</td>
+</tr>
+<tr class="even">
+<td>Machines</td>
+<td>115</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>RAM (GB)</td>
+<td>4,300</td>
+<td>500</td>
+</tr>
+<tr class="even">
+<td>CPU cores</td>
+<td>1,380</td>
+<td>64</td>
+</tr>
+<tr class="odd">
+<td>CPU time*</td>
+<td>6.0 years</td>
+<td>3.2 years</td>
+</tr>
+</tbody>
+</table>
+<p><small>* Time of unitig assembly without scaffolding</small></p>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/abyss2-ideogram.png" alt="Human: 42 Mbp scaffold NG50 with BioNano optical mapping" height="600" /><figcaption>Human: 42 Mbp scaffold NG50 with BioNano optical mapping</figcaption>
+</figure>
+</section>
+<section id="abyss-2.0-conclusions" class="slide level2">
+<h2>ABySS 2.0 Conclusions</h2>
+<ul>
+<li><div class="line-block">ABySS 2.0 reduces memory usage by 10 fold<br />
+from 418 GB to 34 GB for human<br />
+from 4,300 GB to 500 GB for spruce</div></li>
+<li><div class="line-block">High-throughput short-read sequencing<br />
+combined with large molecule scaffolding<br />
+such as 10X Genomics, BioNano, Hi-C<br />
+permits cost effective assembly of large genomes</div></li>
+</ul>
+</section>
+<section id="linked-reads" class="slide level2">
+<h2>Linked Reads</h2>
+<div class="line-block"><img data-src="images/linked-reads.png" alt="Linked reads" /></div>
+</section>
+<section id="contigs-and-scaffolds-come-to-an-end-due-to" class="slide level2">
+<h2>Contigs and scaffolds<br>come to an end due to…</h2>
+<div class="line-block">repeats<br />
+sequencing gaps<br />
+structural variation<br />
+<strong>misassemblies</strong></div>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/elephant-puzzle.jpg" alt="Elephant jigsaw puzzle" height="600" /></div>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/tigmint-diagram-1.png" alt="Misassembled" /></div>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/tigmint-diagram-1.png" alt="Misassembled" /><br />
+Correct misassemblies<br />
+<img data-src="images/tigmint-diagram-2.png" alt="Correct misassemblies" /></div>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/tigmint-diagram-1.png" alt="Misassembled" /><br />
+Correct misassemblies<br />
+<img data-src="images/tigmint-diagram-2.png" alt="Correct misassemblies" /><br />
+Scaffold<br />
+<img data-src="images/tigmint-diagram-3.png" alt="Scaffold" /></div>
+</section>
+<section class="slide level2">
+
+<p><a href="https://github.com/bcgsc/tigmint"><img data-src="images/tigmint.png" alt="Tigmint" /></a></p>
+</section>
+<section class="slide level2">
+
+<p><img data-src="images/tigmint-depth.png" /></p>
+<div class="line-block">Tracks from top to bottom<br />
+molecule coverage, molecules, read coverage, reads</div>
+</section>
+<section class="slide level2">
+
+<p><a href="https://github.com/JustinChu/JupiterPlot"><img data-src="images/tigmint-jupiter.png" alt="Jupiter plot of human HG004" /></a></p>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/tigmint-metrics-abyss.png" alt="Human genome assembly (GIAB HG004 NA24143)" height="400" /></div>
+<ul>
+<li>ARCS improved NGA50 from 3 to 8 Mbp</li>
+<li>Tigmint reduced misassemblies by 216 (27% reduction)</li>
+<li>Tigmint + ARCS improved NGA50 over five-fold to 16 Mbp</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/tigmint-metrics-sms.png" alt="Corrects and improves long read assemblies too!" /><figcaption>Corrects and improves long read assemblies too!</figcaption>
+</figure>
+<table>
+<thead>
+<tr class="header">
+<th>Sequencing</th>
+<th style="text-align: right;">Nanopore</th>
+<th style="text-align: right;">PacBio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Assembler</td>
+<td style="text-align: right;">Canu</td>
+<td style="text-align: right;">Falcon</td>
+</tr>
+<tr class="even">
+<td>NGA50 before Tigmint + ARCS</td>
+<td style="text-align: right;">5.4 Mbp</td>
+<td style="text-align: right;">4.2 Mbp</td>
+</tr>
+<tr class="odd">
+<td>NGA50 after Tigmint + ARCS</td>
+<td style="text-align: right;">10.9 Mbp</td>
+<td style="text-align: right;">12.0 Mbp</td>
+</tr>
+<tr class="even">
+<td>Improvement</td>
+<td style="text-align: right;">2.0 fold</td>
+<td style="text-align: right;">2.9 fold</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="tigmint-conclusions" class="slide level2">
+<h2>Tigmint Conclusions</h2>
+<p>Scaffolding after correcting with Tigmint yields an assembly both more correct and more contiguous.</p>
+<p>Linked reads permit cost-effective assembly of large genomes using high-throughput sequencing.</p>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/western-redcedar.jpg" alt="Western redcedar (Thuja plicata)" /><figcaption>Western redcedar (<em>Thuja plicata</em>)</figcaption>
+</figure>
+</section>
+<section id="western-redcedar-methods" class="slide level2">
+<h2>Western Redcedar Methods</h2>
+<ul>
+<li>Trim adapters with Trimadap and NxTrim</li>
+<li>Count k-mers with ntCard</li>
+<li>Estimate genome size GenomeScope</li>
+<li>Assemble PE and MP reads with ABySS 2.0</li>
+<li>Correct assembly errors<br />
+with Chromium reads using Tigmint</li>
+<li>Scaffold with Chromium reads using ARCS</li>
+<li>Assess genome completeness using BUSCO</li>
+</ul>
+</section>
+<section id="western-redcedar-results" class="slide level2">
+<h2>Western Redcedar Results</h2>
+<ul>
+<li>12.5 Gbp genome size estimated by flow cytometry<br />
+(Hizume <em>et al.</em> 2001 <a href="https://doi.org/d89svf">doi.org/d89svf</a>)</li>
+<li>9.8 Gbp genome size estimated by GenomeScope</li>
+<li>7.95 Gbp assembled in scaffolds 1 kbp or larger</li>
+</ul>
+<p><a href="http://qb.cshl.edu/genomescope/analysis.php?code=Tt3dme47ZFnwHPqVkqqT"><img data-src="images/redcedar-genomescope.png" alt="GenomeScope results" height="300" /></a></p>
+</section>
+<section id="western-redcedar-results-1" class="slide level2">
+<h2>Western Redcedar Results</h2>
+<ul>
+<li>2.04 Mbp scaffold N50 with ARCS</li>
+<li>2.31 Mbp scaffold N50 with Tigmint + ARCS</li>
+<li>Tigmint improved N50 by 14% over ARCS alone</li>
+</ul>
+<p>60.4% of core single-copy genes present (BUSCO)</p>
+<ul>
+<li>53.9% complete</li>
+<li>6.5% fragmented</li>
+<li>39.6% missing</li>
+</ul>
+</section>
+<section id="efficient-assembly-of-large-genomes-1" class="slide level2">
+<h2>Efficient Assembly<br>of Large Genomes</h2>
+<ol type="1">
+<li>Introduction</li>
+<li><strong>ABySS 2.0</strong> <small>(<a href="https://doi.org/f9x8qp">doi.org/f9x8qp</a>)</small></li>
+<li><strong>Tigmint</strong> <small>(<a href="https://doi.org/cwfh">doi.org/cwfh</a>)</small></li>
+<li>UniqTag <small>(<a href="https://doi.org/c3m3">doi.org/c3m3</a>)</small></li>
+<li>ORCA <small>(in review)</small></li>
+<li>Organellar genomes of white spruce <small>(<a href="https://doi.org/f8bxck">doi.org/f8bxck</a>)</small></li>
+<li>Mitochondrial genome of Sitka spruce</li>
+<li><strong>Genome assembly of western redcedar</strong></li>
+<li>Conclusion</li>
+</ol>
+</section>
+<section id="thesis-committee" class="slide level2">
+<h2>Thesis Committee</h2>
+<h3 id="research-supervisors">Research Supervisors</h3>
+<div class="line-block"><a href="http://www.bcgsc.ca/faculty/inanc-birol">Inanc Birol</a>, Medical Genetics<br />
+<a href="http://bohlmannlab.msl.ubc.ca/">Joerg Bohlmann</a>, Michael Smith Laboratories</div>
+<p style="font-size:10pt">
+</p>
+<h3 id="committee-members">Committee Members</h3>
+<div class="line-block"><a href="http://hallam.microbiology.ubc.ca/">Steven Hallam</a>, Microbiology &amp; Immunology<br />
+<a href="http://www.bcgsc.ca/faculty/sjones">Steven Jones</a>, Medical Genetics</div>
+<p style="font-size:10pt">
+</p>
+<h3 id="university-examiners">University Examiners</h3>
+<div class="line-block"><a href="https://botany.ubc.ca/people/keith-adams">Keith Adams</a>, Botany<br />
+<a href="http://www.zoology.ubc.ca/person/pschulte">Patricia Schulte</a>, Zoology</div>
+</section>
+<section class="slide level2">
+
+<p><a href="https://scholar.google.ca/citations?user=wFl3qXAAAAAJ"><img data-src="images/google-scholar-20190318.png" alt="Google Scholar profile of Shaun Jackman" height="650" /></a></p>
+</section>
+<section id="fin" class="slide level2">
+<h2>fin</h2>
+</section>
+<section id="supplemental-slides" class="slide level2">
+<h2>Supplemental Slides</h2>
+</section>
+<section id="publications" class="slide level2">
+<h2>Publications</h2>
+<ul>
+<li>Four first-author (or joint) papers</li>
+<li>One paper each year from 2015 through 2018</li>
+<li>Collaborated on 32 papers since 2009</li>
+<li>28 papers with at least 10 citations</li>
+<li>One first-author manuscript in review (ORCA)</li>
+<li>One first-author manuscript in preparation<br />
+(Sitka spruce mitochondrion)</li>
+<li>ABySS has been cited over 2,700 times!</li>
+</ul>
+<p><a href="https://scholar.google.ca/citations?user=wFl3qXAAAAAJ&amp;hl=en"><img data-src="images/abyss-citations.png" alt="Citations of ABySS (Google Scholar)" /></a></p>
+</section>
+<section id="first-author-publications" class="slide level2">
+<h2>First-author Publications</h2>
+<ul>
+<li>Tigmint: correcting assembly errors using linked reads from large molecules<br />
+<small> <strong>SD Jackman</strong>, L Coombe, J Chu, RL Warren, BP Vandervalk, …<br />
+<em>BMC Bioinformatics</em> 2018 </small></li>
+<li>ABySS 2.0: resource-efficient assembly of large genomes using a Bloom filter<br />
+<small> <strong>SD Jackman</strong><sup>*</sup>, BP Vandervalk<sup>*</sup>, H Mohamadi, J Chu, S Yeo, SA Hammond, …<br />
+<em>Genome Research</em> 2017 </small></li>
+<li>Organellar genomes of white spruce (<em>Picea glauca</em>): assembly and annotation<br />
+<small> <strong>SD Jackman</strong>, RL Warren, EA Gibb, BP Vandervalk, H Mohamadi, J Chu, …<br />
+<em>Genome Biology and Evolution</em> 2015 </small></li>
+<li>UniqTag: content-derived unique and stable identifiers for gene annotation<br />
+<small> <strong>SD Jackman</strong>, J Bohlmann, I Birol<br />
+<em>PLOS ONE</em> 2015 </small></li>
+</ul>
+</section>
+<section id="selected-publications" class="slide level2">
+<h2>Selected Publications</h2>
+<ul>
+<li>Assembly of the complete Sitka spruce chloroplast… <small> L Coombe, RL Warren, <strong>SD Jackman</strong>, C Yang, BP Vandervalk, …, I Birol<br />
+<em>PloS one</em> 2016 </small></li>
+<li>Spaced seed data structures for de novo assembly<br />
+<small> I Birol, J Chu, H Mohamadi, <strong>SD Jackman</strong>, K Raghavan, …, RL Warren<br />
+<em>International journal of genomics</em> 2015 </small></li>
+<li>Konnector v2.0: pseudo-long reads from PE sequencing<br />
+<small> BP Vandervalk, C Yang, Z Xue, K Raghavan, J Chu, H Mohamadi, <strong>SD Jackman</strong>, …, I Birol<br />
+<em>BMC medical genomics</em> 2015 </small></li>
+<li>Sealer: a scalable gap-closing application…<br />
+<small> D Paulino, RL Warren, BP Vandervalk, A Raymond, <strong>SD Jackman</strong>, I Birol<br />
+<em>BMC Bioinformatics</em> 2015 </small></li>
+<li>On the representation of de Bruijn graphs<br />
+<small> R Chikhi, A Limasset, <strong>SD Jackman</strong>, JT Simpson, P Medvedev<br />
+<em>Journal of Computational Biology</em> 2015 </small></li>
+<li>Improved white spruce (<em>Picea glauca</em>) genome…<br />
+<small> RL Warren, CI Keeling, MMS Yuen, A Raymond, GA Taylor, …, J Bohlmann<br />
+<em>The Plant Journal</em> 2015 </small></li>
+<li>Assembling the 20Gb white spruce genome…<br />
+<small> I Birol, A Raymond, <strong>SD Jackman</strong>, S Pleasance, R Coope, …, SJM Jones<br />
+<em>Bioinformatics</em> 2013 </small></li>
+</ul>
+</section>
+<section id="abyss-1.0" class="slide level2">
+<h2>ABySS 1.0</h2>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Human</th>
+<th>Spruce</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Genome size</td>
+<td>3 Gbp</td>
+<td>20 Gbp</td>
+</tr>
+<tr class="even">
+<td>RAM</td>
+<td>418 GB</td>
+<td>4.3 TB</td>
+</tr>
+<tr class="odd">
+<td>CPU cores</td>
+<td>64</td>
+<td>1,380</td>
+</tr>
+<tr class="even">
+<td>Wall time</td>
+<td>14 hours</td>
+<td>12 days</td>
+</tr>
+<tr class="odd">
+<td>Year</td>
+<td>2009 &amp; 2017</td>
+<td>2013</td>
+</tr>
+<tr class="even">
+<td>Short DOI</td>
+<td><a href="https://doi.org/f9x8qp">doi.org/f9x8qp</a></td>
+<td><a href="https://doi.org/f4zzrr">doi.org/f4zzrr</a></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/abyss2-read-extension.png" alt="Solid reads are extended using the Bloom filter de Bruijn graph to assemble unitigs" /><figcaption>Solid reads are extended using the Bloom filter de Bruijn graph to assemble unitigs</figcaption>
+</figure>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/abyss2.mem-vs-time.png" alt="ABySS 2.0 reduces memory usage by 10 fold vs ABySS 1.0 for human genome assembly (GIAB HG004 NA24143)" height="550" /><figcaption>ABySS 2.0 reduces memory usage by 10 fold vs ABySS 1.0 for human genome assembly (GIAB HG004 NA24143)</figcaption>
+</figure>
+</section>
+<section id="spruce-genome-assemblies-1" class="slide level2">
+<h2>Spruce genome assemblies</h2>
+<table>
+<thead>
+<tr class="header">
+<th>ABySS</th>
+<th>1.3.5</th>
+<th>2.0.0</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Spruce species</td>
+<td>Interior</td>
+<td>Sitka</td>
+</tr>
+<tr class="even">
+<td>Machines</td>
+<td>115</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>RAM (GB)</td>
+<td>4,300</td>
+<td>500</td>
+</tr>
+<tr class="even">
+<td>CPU cores</td>
+<td>1,380</td>
+<td>64</td>
+</tr>
+<tr class="odd">
+<td>CPU time* (years)</td>
+<td>6.0</td>
+<td>3.2</td>
+</tr>
+<tr class="even">
+<td>Wall time* (days)</td>
+<td>1.6</td>
+<td>18</td>
+</tr>
+<tr class="odd">
+<td>Year</td>
+<td>2013</td>
+<td>2017</td>
+</tr>
+<tr class="even">
+<td>Short DOI</td>
+<td><a href="https://doi.org/f4zzrr">doi:f4zzrr</a></td>
+<td>NA</td>
+</tr>
+</tbody>
+</table>
+<p><small>* Time of unitig assembly without scaffolding</small></p>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/abyss2-metrics.png" alt="Contiguity and correctness are comparable" height="600" /><figcaption>Contiguity and correctness are comparable</figcaption>
+</figure>
+</section>
+<section id="tools-for-linked-reads" class="slide level2">
+<h2>Tools for Linked Reads</h2>
+<div class="line-block"><strong>Align linked reads</strong><br />
+Lariat (Long Ranger) · EMA<br />
+<strong>Structural variants</strong><br />
+Long Ranger · GROC-SVs · NAIBR · SVenX · Topsorter<br />
+<strong>Phase variants</strong><br />
+Long Ranger<br />
+<strong>Genome sequence assembly</strong><br />
+Supernova<br />
+<strong>Scaffolding</strong><br />
+ARCS · Architect · Fragscaff · Scaff10x</div>
+<p><a href="https://github.com/johandahlberg/awesome-10x-genomics" class="uri">https://github.com/johandahlberg/awesome-10x-genomics</a></p>
+</section>
+<section id="tigmint-method" class="slide level2">
+<h2>Tigmint Method</h2>
+<ul>
+<li>Map reads to the assembly</li>
+<li>Group reads within <em>d</em> bp of each other (<em>d</em> = 50 kbp)</li>
+<li>Infer start and end coordinates of molecules</li>
+<li>Construct an interval tree of the molecules</li>
+<li>Each <em>w</em> bp region ought to be spanned by <em>n</em> molecules<br />
+(<em>w</em> = 1 kbp, <em>n</em> = 20)</li>
+<li>Identify regions with fewer than <em>n</em> spanning molecules</li>
+<li>Cut sequences at regions with insufficient coverage</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<div class="line-block"><img data-src="images/tigmint-metrics.png" alt="Human genome assemblies (GIAB HG004 NA24143)" height="500" /></div>
+<p>Note: Supernova used only linked reads, others PE+MP+LR.</p>
+</section>
+<section id="tigmint-time-and-memory" class="slide level2">
+<h2>Tigmint Time and Memory</h2>
+<div class="line-block"><strong><code>bwa mem</code></strong> Map reads to assembly<br />
+5½ hours, 17 GB RAM, 48 threads<br />
+<strong><code>tigmint-molecule</code></strong> Group reads into molecules<br />
+3¼ hours, 0.08 GB RAM, 1 thread<br />
+<strong><code>tigmint-cut</code></strong> Identify misassemblies and cut sequences<br />
+7 minutes, 3.3 GB RAM, 48 threads</div>
+</section>
+<section id="physlr" class="slide level2">
+<h2>Physlr</h2>
+<h3 id="physical-maps-of-linked-reads">Physical Maps of Linked Reads</h3>
+<figure>
+<img data-src="images/physical-map.png" alt="Traditional physical map of cosmids" /><figcaption>Traditional physical map of cosmids</figcaption>
+</figure>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/physlr-plastid.png" alt="Physlr map of a plastid genome (120 kbp)" /><figcaption>Physlr map of a plastid genome (120 kbp)</figcaption>
+</figure>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/physlr-flychr4.png" alt="Physlr map of fruit fly chr4 (1.35 Mbp)" /><figcaption>Physlr map of fruit fly chr4 (1.35 Mbp)</figcaption>
+</figure>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/physlr-fly.png" alt="Physlr map of fruit fly (7 chromosomes, 138 Mbp)" /><figcaption>Physlr map of fruit fly (7 chromosomes, 138 Mbp)</figcaption>
+</figure>
+</section>
+<section class="slide level2">
+
+<figure>
+<img data-src="images/physlr-zebrafish.png" alt="Physlr map of zebrafish (25 chromosomes, 1.35 Gbp)" /><figcaption>Physlr map of zebrafish (25 chromosomes, 1.35 Gbp)</figcaption>
+</figure>
+</section>
+<section id="our-dance-card" class="slide level2">
+<h2>Our Dance Card</h2>
+<h3 id="human-3-gbp">Human (3 Gbp)</h3>
+<h3 id="western-redcedar-12-gbp">Western redcedar (12 Gbp)</h3>
+<h3 id="sitka-spruce-20-gbp">Sitka spruce (20 Gbp)</h3>
+<h3 id="white-spruce-20-gbp">White spruce (20 Gbp)</h3>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display the page number of the current slide
+        slideNumber: true,
+        // Push each slide change to the browser history
+        history: true,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
