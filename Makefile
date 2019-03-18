@@ -1,4 +1,4 @@
-all: 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html 2019-02-25.html 2019-03-15.html
+all: 2014-08-22.html 2015-06-15.html 2015-07-27.html 2018-03-14.html 2019-02-25.html 2019-03-15.html 2019-03-18.html
 
 install-deps:
 	brew install pandoc
