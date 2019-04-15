@@ -1,0 +1,13 @@
+digraph {
+node [shape="rectangle" width="3.5in"]
+
+trim [label="Trim sequencing adapaters\nTrimadap + NxTrim"]
+ntcard [label="Count k-mers\nntCard"]
+genomescope [label="Estimate genome size\nGenomeScope"]
+abyss [label="Assemble PE + MP reads\nABySS 2.0"]
+tigmint [label="Correct misassemblies with Chromium reads\nTigmint"]
+arcs [label="Scaffold with Chromium reads\nARCS"]
+busco [label="Assess genome completeness\nBUSCO"]
+
+trim -> ntcard -> genomescope -> abyss -> tigmint -> arcs -> busco
+}
